@@ -15,9 +15,13 @@ $(document).ready(function () {
           
         $.ajax(settings).done(function (response) {
             let searchResults = response.results;
-            console.log(searchResults);
             $.each(searchResults, function(i, value){
-                $("#load-search-data").innerHTML = value;
+                let searchObjects = value;
+                $.each(searchObjects, function (i, value){
+                    let div = document.createElement("div");
+                    $("#load-search-data").append(div, value)
+                })
+               
             });
         });        
     });

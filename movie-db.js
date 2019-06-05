@@ -32,9 +32,18 @@ function GetData(){
         
     $.ajax(settings).done(function (response) {
         let searchResults = response.results;
+        let id = 0;
         $.each(searchResults, function(i, value){
+            id++;
             let searchObjects = value;
             console.dir(searchObjects);
+            let newDiv = document.createElement("div");
+            newDiv.id = "results" + id;
+            newDiv.className = "boxes";
+            let target = $("#load-search-data");
+            target.append(newDiv);
+            let newTarget = $("#results" + id)
+
             if (searchObjects.media_type === "movie"){
                 let movieImg = searchObjects.poster_path;
                 let title = searchObjects.original_title;
@@ -42,39 +51,41 @@ function GetData(){
                 let overview = searchObjects.overview;
                 let div = document.createElement("div");
                 div.innerHTML = title + "<br>" + rating + "<br>" + overview;
-                let target = $("#load-search-data")
+                
 
 
                 // Create images
                 var imageTag = document.createElement("img");
                 imageTag.src = `${"https://image.tmdb.org/t/p/w500/" + movieImg}`
-                target.append(imageTag);
-                target.append(div);
+                imageTag.alt = title;
+                newTarget.append(imageTag);
+                newTarget.append(div);
             } else if (searchObjects.media_type === "person") {
                 let personImg = searchObjects.profile_path;
                 let name = searchObjects.name;
                 let movies = searchObjects.known_for;
-                let works = $.each(movies, function(i, value){
-                    
-                    let workName = value.original_title;
-                    return workName;
-                })
-                console.log(works); 
-
+                
 
                 let div = document.createElement("div");
-                div.innerHTML = "<h2>" + name + "</h2>" + "<br>" + "List of Movies/Shows:" + "<br>" + works;
-                let target = $("#load-search-data")
+                div.innerHTML = "<h2>" + name + "</h2><br><h3>" + "List of Movies/Shows:" + "</h3><br>";
+                let newTarget = $("#load-search-data")
                 var imageTag = document.createElement("img");
                 imageTag.src = `${"https://image.tmdb.org/t/p/w500/" + personImg}`
-                target.append(imageTag);
-                target.append(div);
+                imageTag.alt = name;
+                newTarget.append(imageTag);
+                newTarget.append(div);
+                $.each(movies, function(c, names){
+                    workTitles = names.original_title + ", ";
+                    div.append(workTitles);
+                })
 
             }
         }) 
     });        
 }   
 function loadCarousel(){
+    let carousel = $(".carousel-inner")
+
     var settings = {
         "async": true,
         "crossDomain": true,
@@ -84,7 +95,26 @@ function loadCarousel(){
         "data": "{}"
         }
         
-        $.ajax(settings).done(function (response) {
+    $.ajax(settings).done(function (response) {
         console.dir(response.results);
-        });
-    }
+        let results = response.results;
+        $.each(results, function(i, value){
+            console.log(value);
+            let movieTitle = value.original_title;
+            let desc = value.overview;
+            let newDiv = document.createElement("div");
+            let newDiv2 = document.createElement("div");
+            newDiv.className = "carousel-item"
+            let image = document.createElement("img");
+            image.src = `${"https://image.tmdb.org/t/p/original/" + value.backdrop_path}`
+            image.className = "d-block w-100"
+            if(i===0){
+                newDiv.className = "carousel-item active";
+            }
+            carousel.append(newDiv);
+            newDiv.append(image)
+            newDiv.append(newDiv2);
+            newDiv2.innerHTML = `${"<h2>" + movieTitle + "</h2><p>" + desc + "</p>"}`
+        })
+    });
+}

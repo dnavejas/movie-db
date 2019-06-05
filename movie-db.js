@@ -8,6 +8,7 @@ $(document).ready(function () {
     });
     GetData();
     loadCarousel();
+    top10Movies();
 });
 
 function getUrlParameter(name) {
@@ -96,10 +97,8 @@ function loadCarousel(){
         }
         
     $.ajax(settings).done(function (response) {
-        console.dir(response.results);
         let results = response.results;
         $.each(results, function(i, value){
-            console.log(value);
             let movieTitle = value.original_title;
             let desc = value.overview;
             let newDiv = document.createElement("div");
@@ -117,4 +116,47 @@ function loadCarousel(){
             newDiv2.innerHTML = `${"<h2>" + movieTitle + "</h2><p>" + desc + "</p>"}`
         })
     });
+}
+function top10Movies(){
+    var settings = {
+        "async": true,
+        "crossDomain": true,
+        "url": "https://api.themoviedb.org/3/movie/top_rated?page=1&language=en-US&api_key=9d11c1773b21ad7a4a5761cc1454361b",
+        "method": "GET",
+        "headers": {},
+        "data": "{}"
+      }
+      
+      $.ajax(settings).done(function (response) {
+        let topMovies = response.results;
+        $.each(topMovies, function(i, value){
+            console.dir(value);
+            let div1 = document.createElement("div");
+            div1.className = "card";
+            div1.style = "width: 18rem;";
+            let image1 = document.createElement("img");
+            image1.src = `${"https://image.tmdb.org/t/p/original/" + value.poster_path}`
+            image1.className = "card-img-top";
+            let div2 = document.createElement("div");
+            div2.className = "card-body";
+            let h5 = document.createElement("h5");
+            h5.className = "card-title";
+            h5.innerHTML = value.original_title;
+            let p = document.createElement("p");
+            p.className = "card-text";
+            p.innerHTML = value.overview;
+            
+            div1.append(image1);
+
+
+
+            $("#top-movies").append
+        })
+        
+
+
+
+
+       
+      });
 }

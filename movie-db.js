@@ -9,8 +9,11 @@ $(document).ready(function () {
     GetData();
     loadCarousel();
     top10Movies();
+   
 });
-
+$('#carouselExampleCaptions').bind('slide.bs.carousel', function (e) {
+    upcomingMovieActors();
+});
 function getUrlParameter(name) {
     name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
     var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
@@ -103,7 +106,8 @@ function loadCarousel(){
             let desc = value.overview;
             let newDiv = document.createElement("div");
             let newDiv2 = document.createElement("div");
-            newDiv.className = "carousel-item"
+            newDiv.className = "carousel-item";
+            newDiv.id = value.id;
             let image = document.createElement("img");
             image.src = `${"https://image.tmdb.org/t/p/original/" + value.backdrop_path}`
             image.className = "d-block w-100"
@@ -130,12 +134,10 @@ function top10Movies(){
       $.ajax(settings).done(function (response) {
         let topMovies = response.results;
         $.each(topMovies, function(i, value){
-            console.dir(value);
             let div1 = document.createElement("div");
             div1.className = "card";
-            div1.style = "width: 18rem;";
             let image1 = document.createElement("img");
-            image1.src = `${"https://image.tmdb.org/t/p/original/" + value.poster_path}`
+            image1.src = `${"https://image.tmdb.org/t/p/original/" + value.poster_path}`;
             image1.className = "card-img-top";
             let div2 = document.createElement("div");
             div2.className = "card-body";
@@ -145,18 +147,47 @@ function top10Movies(){
             let p = document.createElement("p");
             p.className = "card-text";
             p.innerHTML = value.overview;
-            
+            let a = document.createElement("a");
+            a.href = "";
+            a.className = "btn btn-primary";
             div1.append(image1);
-
-
-
-            $("#top-movies").append
+            div2.append(h5, p, a);
+            div1.append(div2);
+            $("#top-movies").append(div1);
         })
-        
-
-
-
-
-       
       });
+}
+function upcomingMovieActors(){
+    let activeSlide = $(".active")
+    let movieId = activeSlide[1].id;
+    
+    var settings = {
+        "async": true,
+        "crossDomain": true,
+        "url": `${"https://api.themoviedb.org/3/movie/"+movieId+"/credits?api_key=9d11c1773b21ad7a4a5761cc1454361b"}`,
+        "method": "GET",
+        "headers": {},
+        "data": "{}"
+    }
+    let targetDiv = $(".actor-div")
+    if (targetDiv.length === 0){
+        targetDiv.remove();
+    }
+    $.ajax(settings).done(function (response) {
+        let results = response.cast;
+        let cast = results.slice(0,3);
+        let castDiv = $("#movie-actors");
+        let actorDiv = document.createElement("div");
+        actorDiv.className = "actor-div"
+        for (let i = 0; i < cast.length; i++){
+           
+            let castImg = document.createElement("img");
+            let actorImg = cast[i].profile_path;
+            castImg.src = `${"https://image.tmdb.org/t/p/original" + actorImg}`
+
+            actorDiv.append(castImg);
+            
+        };
+        castDiv.append(actorDiv);
+    })
 }

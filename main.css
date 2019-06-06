@@ -1,11 +1,20 @@
+.boxes{
+    margin: 10px;
+    flex: 3;
+}
 #load-search-data{
     text-align: center;
     display: flex;
     flex-wrap: wrap;
-    width: 100vw;
-    
+    width: 100vw;  
 }
-.boxes{
+#top-movies{
+    display: flex;
+    flex-wrap: wrap;
+    width: 100vw;
+    text-align: center;
+}
+.card{
+    flex: 5;
     margin: 10px;
-    flex: 3;
 }

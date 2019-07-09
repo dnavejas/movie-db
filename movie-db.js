@@ -6,6 +6,15 @@ $(document).ready(function() {
 
     window.location.href = `search-results.html?query=${searchCriteria}`;
   });
+  let actordId = getUrlParameter("actorId");
+  let movieId = getUrlParameter("movieId");
+
+  if (actordId !== "") {
+    getActorDetails(actordId);
+  }
+  if (movieId !== "") {
+    getMovieDetails(movieId);
+  }
   GetData();
   loadCarousel();
   top10Movies();
@@ -137,10 +146,10 @@ function top10Movies() {
     let topMovies = response.results.slice(0, 10);
     let id = 0;
     $.each(topMovies, function(i, value) {
-      //   let movieID = response.results[id].id;
       let link = document.createElement("a");
-      link.href = "#";
-      //   link.href = `https://api.themoviedb.org/3/movie/${movieID}?api_key=9d11c1773b21ad7a4a5761cc1454361b&language=en-US`;
+      link.href = `file:///Users/Danny/Projects/movie-db/movies.html?movieId=${
+        value.id
+      }`;
       let div1 = document.createElement("div");
       div1.className = "card";
       let image1 = document.createElement("img");
@@ -183,14 +192,17 @@ function upcomingMovieActors() {
   }
   $.ajax(settings).done(function(response) {
     let results = response.cast;
+    console.log(results);
     let cast = results.slice(0, 3);
     let castDiv = $("#movie-actors");
     let actorDiv = document.createElement("div");
     actorDiv.className = "actor-div";
     for (let i = 0; i < cast.length; i++) {
       let imageLink = document.createElement("a");
-      imageLink.href = "#";
-      imageLink.id = cast[i].profile_path;
+      imageLink.href = `file:///Users/Danny/Projects/movie-db/actors.html?actorId=${
+        cast[i].id
+      }`;
+      imageLink.id = cast[i].id;
       let castImg = document.createElement("img");
       castImg.className = "actor-images";
       castImg.data = "actor";
@@ -202,27 +214,119 @@ function upcomingMovieActors() {
     castDiv.append(actorDiv);
   });
 }
-$(document).click(function(e) {
-  e.preventDefault();
-  let id = e.target.id;
-  if (e.target.data == "movie") {
-    var settings = {
-      async: true,
-      crossDomain: true,
-      url: `https://api.themoviedb.org/3/movie/${id}?language=en-US&api_key=9d11c1773b21ad7a4a5761cc1454361b`,
-      method: "GET",
-      headers: {},
-      data: "{}"
-    };
+function getMovieDetails(id) {
+  var settings = {
+    async: true,
+    crossDomain: true,
+    url: `https://api.themoviedb.org/3/movie/${id}?language=en-US&api_key=9d11c1773b21ad7a4a5761cc1454361b`,
+    method: "GET",
+    headers: {},
+    data: "{}"
+  };
 
-    $.ajax(settings).done(function(response) {
-      console.log(response);
+  $.ajax(settings).done(function(response) {
+    let poster = document.createElement("div");
+    poster.innerHTML = `<img style="margin:0px auto;  width:800px !important ; height: 500px; width:100%; background-repeat:no-repeat; background-size:cover;" src="https://image.tmdb.org/t/p/w500${
+      response.backdrop_path !== undefined
+        ? response.backdrop_path
+        : response.poster_path
+    }" />  
+  <div style="text-align:left; padding: 30px; margin:0px auto; background-color:white; max-width:800px;"><div style="">
+    <h1 class="primary-header">${response.original_title}</h1>
+    <p style=" text-align:left;">${response.overview}</p>
+    <div style="width:80%; text-align:left; padding-top:30px;">
+    <p>Release Date: ${response.release_date}</p>  
+    <p> Status: ${response.status}</p> 
+    <p> Vote Average: ${response.vote_average}</p>
+    <ul id="reviews"><b>Reviews:<b></ul>
+    </div>
+    </div>
+    <a class="primary-btn" href="${response.homepage}">Live Site</a>
+  </div>`;
+    getMovieReviews(id);
+    $(poster).addClass("poster");
+    $("#movie-details").append(poster);
+  });
+}
+function getActorDetails(actorId) {
+  var settings = {
+    async: true,
+    crossDomain: true,
+    url: `https://api.themoviedb.org/3/person/${actorId}?api_key=08f123202c02b3f6e43980f02514a11d&language=en-US`,
+    method: "GET",
+    headers: {},
+    data: "{}"
+  };
 
-      let targetDiv = $("#load-search-data");
-      let h1 = document.createElement("h1");
-      h1.title = response.original_title;
-      targetDiv.append(h1);
-      window.location = `search-results.html?query=${id}`;
+  $.ajax(settings).done(function(response) {
+    console.log(response);
+    let poster = document.createElement("div");
+    poster.innerHTML = `<img style="margin:0px auto;  width:800px !important ; height: 500px; width:100%; background-repeat:no-repeat; background-size:cover;" src="https://image.tmdb.org/t/p/w500${
+      response.profile_path !== undefined
+        ? response.profile_path
+        : response.poster_path
+    }" />  
+  <div style="text-align:left; padding: 0px; margin:0px auto; background-color:white; max-width:800px;"><div style="">
+    <h1 class="primary-header">${response.name}</h1>
+    <p style=" text-align:left;">Born: ${response.birthday}</p>
+    <p> Place of Birth: ${response.place_of_birth}</p>
+    <div style="width:80%; text-align:left; padding-top:30px;">
+    <p>Biography: ${response.biography}</p>  
+    <p>Popularity: ${response.popularity}</p>
+    <div id="works-list">List of Works</div>
+    </div>
+    </div>
+    <a class="primary-btn" href="${response.homepage}">Live Site</a>
+  </div>`;
+    getActorsMovies(`${response.id}`);
+    $(poster).addClass("poster");
+    $("#actor-details").append(poster);
+  });
+}
+
+function getActorsMovies(id) {
+  var settings = {
+    async: true,
+    crossDomain: true,
+    url: `https://api.themoviedb.org/3/person/${id}/combined_credits?language=en-US&api_key=08f123202c02b3f6e43980f02514a11d`,
+    method: "GET",
+    headers: {},
+    data: "{}"
+  };
+
+  $.ajax(settings).done(function(response) {
+    console.log(response);
+    let destination = $("#works-list");
+    let list = document.createElement("ul");
+    $.each(response.cast, function(i, value) {
+      console.log(value);
+
+      let newItem = document.createElement("li");
+      newItem.innerText = !value.original_title
+        ? value.name
+        : value.original_title;
+      list.append(newItem);
     });
-  }
-});
+    destination.append(list);
+  });
+}
+function getMovieReviews(id) {
+  var settings = {
+    async: true,
+    crossDomain: true,
+    url: `https://api.themoviedb.org/3/movie/${id}/reviews?page=1&language=en-US&api_key=08f123202c02b3f6e43980f02514a11d`,
+    method: "GET",
+    headers: {},
+    data: "{}"
+  };
+
+  $.ajax(settings).done(function(response) {
+    let div = $("#reviews");
+    $.each(response.results, function(i, value) {
+      console.log(value);
+      let p = document.createElement("li");
+      p.innerText = value.content;
+      div.append(p);
+    });
+  });
+}
